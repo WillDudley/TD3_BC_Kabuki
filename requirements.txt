@@ -1,0 +1,6 @@
+jupyter
+torch
+numpy
+gymnasium
+tqdm
+d4rl
