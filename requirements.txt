@@ -4,3 +4,4 @@ numpy
 gymnasium
 tqdm
 d4rl
+wandb

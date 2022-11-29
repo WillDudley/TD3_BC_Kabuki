@@ -1,3 +1,4 @@
+import wandb
 import numpy as np
 import torch
 import gym
@@ -5,6 +6,7 @@ import argparse
 import os
 import d4rl
 import d4rl.gym_mujoco # Import required to register environments
+from api_key import comet_api_key
 
 import utils
 from algorithms import TD3_BC
@@ -60,6 +62,14 @@ if __name__ == "__main__":
 	print(f"Policy: {args.policy}, Env: {args.env}, Seed: {args.seed}")
 	print("---------------------------------------")
 
+	wandb.init(project="Offline-RL-benchmarks",
+			   entity="willdudley",
+			   config=args,
+			   save_code=True,
+			   tags=[args.policy, args.env],
+			   name=file_name,
+			   id=file_name)
+
 	if not os.path.exists("./results"):
 		os.makedirs("./results")
 
@@ -108,4 +118,6 @@ if __name__ == "__main__":
 		# Evaluate episode
 		if (t + 1) % args.eval_freq == 0:
 			print(f"Time steps: {t+1}")
-			evaluations.append(eval_policy(policy, args.env, args.seed, mean, std))
+			score = eval_policy(policy, args.env, args.seed, mean, std)
+			evaluations.append(score)
+			wandb.log({"Score": score}, step=t)
