@@ -61,19 +61,13 @@ if __name__ == "__main__":
 	print(f"Policy: {args.policy}, Env: {args.env}, Seed: {args.seed}")
 	print("---------------------------------------")
 
-	wandb.init(project="Offline-RL-benchmarks",
+	wandb.init(project="Offline-RL-benchmarks-model-testing",
 			   entity="willdudley",
 			   config=args,
 			   save_code=True,
 			   tags=[args.policy, args.env],
 			   name=file_name,
 			   id=file_name)
-	trained_model_artifact = wandb.Artifact(name=file_name,
-											type='model',
-											description=None,
-											metadata=None,
-											incremental=None,
-											use_as=None)
 
 	if not os.path.exists("./results"):
 		os.makedirs("./results")
@@ -126,6 +120,14 @@ if __name__ == "__main__":
 			score = eval_policy(policy, args.env, args.seed, mean, std)
 			evaluations.append(score)
 			wandb.log({"Score": score}, step=t)
-			policy.save(f"./models/{file_name}")
-			trained_model_artifact.add_file(f"./models/{file_name}")
+
+			trained_model_artifact = wandb.Artifact(name=file_name,
+													type='model',
+													description=None,
+													metadata=None,
+													incremental=None,
+													use_as=None)
+
+			policy.save(f"./models/{file_name}.pth")
+			trained_model_artifact.add_file(f"./models/{file_name}.pth")
 			wandb.log_artifact(trained_model_artifact)
