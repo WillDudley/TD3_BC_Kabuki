@@ -106,6 +106,10 @@ if __name__ == "__main__":
 
 	replay_buffer = utils.ReplayBuffer(state_dim, action_dim)
 	replay_buffer.convert_D4RL(d4rl.qlearning_dataset(env))
+	artifact = wandb.Artifact(args.env, type='dataset')
+	artifact.add_reference(env.dataset_url)
+	wandb.log_artifact(artifact)
+
 	if args.normalize:
 		mean,std = replay_buffer.normalize_states() 
 	else:
