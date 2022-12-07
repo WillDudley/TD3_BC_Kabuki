@@ -61,7 +61,7 @@ if __name__ == "__main__":
 	print(f"Policy: {args.policy}, Env: {args.env}, Seed: {args.seed}")
 	print("---------------------------------------")
 
-	wandb.init(project="Offline-RL-benchmarks-model-testing",
+	wandb.init(project="scrapyard", # "Offline-RL-benchmarks-model-testing",
 			   entity="willdudley",
 			   config=args,
 			   save_code=True,
