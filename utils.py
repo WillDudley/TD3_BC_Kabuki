@@ -43,13 +43,21 @@ class ReplayBuffer(object):
 		)
 
 
-	def convert_D4RL(self, dataset):
-		self.state = dataset['observations']
-		self.action = dataset['actions']
-		self.next_state = dataset['next_observations']
-		self.reward = dataset['rewards'].reshape(-1,1)
-		self.not_done = 1. - dataset['terminals'].reshape(-1,1)
-		self.size = self.state.shape[0]
+	def convert_D4RL(self, dataset, minari=True):
+		if minari:
+			self.state = dataset.observations[:-1]
+			self.action = dataset.actions[:-1]
+			self.next_state = dataset.observations[1:]
+			self.reward = dataset.rewards[:-1].reshape(-1,1)
+			self.not_done = 1. - dataset.terminations[:-1].reshape(-1,1)
+			self.size = self.state.shape[0]
+		else:
+			self.state = dataset['observations']
+			self.action = dataset['actions']
+			self.next_state = dataset['next_observations']
+			self.reward = dataset['rewards'].reshape(-1, 1)
+			self.not_done = 1. - dataset['terminals'].reshape(-1, 1)
+			self.size = self.state.shape[0]
 
 
 	def normalize_states(self, eps = 1e-3):

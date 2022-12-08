@@ -1,3 +1,4 @@
+import minari
 import wandb
 import numpy as np
 import torch
@@ -37,7 +38,7 @@ if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
 	# Experiment
 	parser.add_argument("--policy", default="TD3_BC")               # Policy name
-	parser.add_argument("--env", default="hopper-medium-v0")        # OpenAI gym environment name
+	parser.add_argument("--env", default="hopper-random-v0")        # OpenAI gym environment name
 	parser.add_argument("--seed", default=0, type=int)              # Sets Gym, PyTorch and Numpy seeds
 	parser.add_argument("--eval_freq", default=5e3, type=int)       # How often (time steps) we evaluate
 	parser.add_argument("--max_timesteps", default=1e4, type=int)   # Max time steps to run environment
@@ -75,7 +76,10 @@ if __name__ == "__main__":
 	if args.save_model and not os.path.exists("./models"):
 		os.makedirs("./models")
 
-	env = gym.make(args.env)
+	dataset = minari.download_dataset("D4RL-hopper-random_v0_Legacy-D4RL-dataset")
+	env = gym.make(dataset.env_name)
+
+	env_old = gym.make(args.env)
 
 	# Set seeds
 	env.seed(args.seed)
@@ -105,7 +109,16 @@ if __name__ == "__main__":
 	policy = TD3_BC.TD3_BC(**kwargs)
 
 	replay_buffer = utils.ReplayBuffer(state_dim, action_dim)
-	replay_buffer.convert_D4RL(d4rl.qlearning_dataset(env))
+	replay_buffer.convert_D4RL(dataset)
+
+	replay_buffer_old = utils.ReplayBuffer(state_dim, action_dim)
+	replay_buffer_old.convert_D4RL(d4rl.qlearning_dataset(env), minari=False)
+	replay_buffer.state == replay_buffer_old.state
+	replay_buffer.action == replay_buffer_old.action
+	replay_buffer.next_state == replay_buffer_old.next_state
+	replay_buffer.reward == replay_buffer_old.reward
+	replay_buffer.not_done == replay_buffer_old.not_done
+
 	artifact = wandb.Artifact(args.env, type='dataset')
 	artifact.add_reference(env.dataset_url)
 	wandb.log_artifact(artifact)
