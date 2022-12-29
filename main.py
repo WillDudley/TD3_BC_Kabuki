@@ -34,7 +34,9 @@ def eval_policy(policy, env_name, seed, mean, std, seed_offset=100, eval_episode
 
 
 if __name__ == "__main__":
-	
+
+	os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "./credentials.json"
+
 	parser = argparse.ArgumentParser()
 	# Experiment
 	parser.add_argument("--policy", default="TD3_BC")               # Policy name
