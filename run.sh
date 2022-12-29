@@ -20,7 +20,7 @@ envs=(
 #	"walker2d-medium-replay-v0"
 	)
 
-for ((i=5;i<7;i+=1))
+for ((i=7;i<9;i+=1))
 do
 	for env in ${envs[*]}
 	do
