@@ -76,8 +76,9 @@ if __name__ == "__main__":
 	if args.save_model and not os.path.exists("./models"):
 		os.makedirs("./models")
 
-	dataset = minari.download_dataset("D4RL-hopper-random_v0_Legacy-D4RL-dataset")
-	env = gym.make(dataset.env_name)
+	dataset_name = f"D4RL-{args.env[:-3]}_{args.env[-2:]}_Legacy-D4RL-dataset"
+	dataset = minari.download_dataset(dataset_name)
+	env = gym.make(dataset.environment_name.decode("utf-8"))
 
 	env_old = gym.make(args.env)
 
@@ -112,7 +113,7 @@ if __name__ == "__main__":
 	replay_buffer.convert_D4RL(dataset)
 
 	replay_buffer_old = utils.ReplayBuffer(state_dim, action_dim)
-	replay_buffer_old.convert_D4RL(d4rl.qlearning_dataset(env), minari=False)
+	replay_buffer_old.convert_D4RL(d4rl.qlearning_dataset(env_old), minari=False)
 	replay_buffer.state == replay_buffer_old.state
 	replay_buffer.action == replay_buffer_old.action
 	replay_buffer.next_state == replay_buffer_old.next_state
@@ -120,7 +121,7 @@ if __name__ == "__main__":
 	replay_buffer.not_done == replay_buffer_old.not_done
 
 	artifact = wandb.Artifact(args.env, type='dataset')
-	artifact.add_reference(env.dataset_url)
+	artifact.add_reference("https://storage.cloud.google.com/minari/D4RL-hopper-random_v0_Legacy-D4RL-dataset.hdf5")
 	wandb.log_artifact(artifact)
 
 	if args.normalize:
