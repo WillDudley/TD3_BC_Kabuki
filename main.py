@@ -1,3 +1,6 @@
+import warnings
+warnings.filterwarnings("ignore")  # warnings ignored as this is for reproducability
+
 import minari
 import wandb
 import numpy as np
@@ -5,6 +8,7 @@ import torch
 import gym
 import argparse
 import os
+os.environ["D4RL_SUPPRESS_IMPORT_ERROR"] = "1"
 import d4rl
 import d4rl.gym_mujoco # Import required to register environments
 
@@ -34,13 +38,15 @@ def eval_policy(policy, env_name, seed, mean, std, seed_offset=100, eval_episode
 
 
 if __name__ == "__main__":
+	warnings.filterwarnings("ignore")  # warnings ignored as this is for reproducability
 
 	os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "./credentials.json"
 
 	parser = argparse.ArgumentParser()
 	# Experiment
 	parser.add_argument("--policy", default="TD3_BC")               # Policy name
-	parser.add_argument("--env", default="hopper-random-v0")        # OpenAI gym environment name
+	parser.add_argument("--env", default="hopper")                  # OpenAI gym environment name
+	parser.add_argument("--extension", default="random-v0")         #
 	parser.add_argument("--seed", default=0, type=int)              # Sets Gym, PyTorch and Numpy seeds
 	parser.add_argument("--eval_freq", default=5e3, type=int)       # How often (time steps) we evaluate
 	parser.add_argument("--max_timesteps", default=1e4, type=int)   # Max time steps to run environment
@@ -78,11 +84,11 @@ if __name__ == "__main__":
 	if args.save_model and not os.path.exists("./models"):
 		os.makedirs("./models")
 
-	dataset_name = f"D4RL-{args.env[:-3]}_{args.env[-2:]}_Legacy-D4RL-dataset"
+	dataset_name = f"D4RL-{args.env}-{args.extension[:-3]}_{args.extension[-2:]}_Legacy-D4RL-dataset"
 	dataset = minari.download_dataset(dataset_name)
 	env = gym.make(dataset.environment_name.decode("utf-8"))
 
-	env_old = gym.make(args.env)
+	env_old = gym.make(f"{args.env}-{args.extension}")
 
 	# Set seeds
 	env.seed(args.seed)
@@ -137,7 +143,7 @@ if __name__ == "__main__":
 		# Evaluate episode
 		if (t + 1) % args.eval_freq == 0:
 			print(f"Time steps: {t+1}")
-			score = eval_policy(policy, args.env, args.seed, mean, std)
+			score = eval_policy(policy, f"{args.env}-{args.extension}", args.seed, mean, std)
 			evaluations.append(score)
 			wandb.log({"Score": score}, step=t)
 
